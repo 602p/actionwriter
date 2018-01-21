@@ -140,12 +140,25 @@ void loop() {
     else mapped_key = kb_layout[a];
 
     if(state[a] && !old_state[a]){
-      if(state[3] && kb_layout[a]=='w') fullWidthMode=!fullWidthMode;
+      if(state[3] && kb_layout[a]=='w'){
+        fullWidthMode=!fullWidthMode;
+        if(fullWidthMode) Serial.println("START FULLWIDTH");
+        else Serial.println("STOP FULLWIDTH");
+      }
+      else if(fullWidthMode){
+        Serial.print("PRESS ");
+        Serial.println(a, DEC);
+      }
       else if(a==4) writeUnicode("00b2");
       else if(mapped_key!=0) Keyboard.press(mapped_key);
     }else if(!state[a] && old_state[a]){
-      if(mapped_key!=0) Keyboard.release(mapped_key);
+      if(fullWidthMode){
+        Serial.print("RELEASE ");
+        Serial.println(a, DEC);
+      }
+      else if(mapped_key!=0) Keyboard.release(mapped_key);
     }
+
     a++;
   }
   memcpy(old_state, state, sizeof state);
