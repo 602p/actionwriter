@@ -101,7 +101,7 @@ void loop() {
   int a=0;
   int mapped_key;
   while(a<64){
-    if(a==62) mapped_key=KEY_BACKSPACE;
+    if(a==62) mapped_key=state[3]?KEY_DELETE:KEY_BACKSPACE;
     else if(a==59) mapped_key=KEY_RETURN;
     else if(a==11) mapped_key=KEY_LEFT_SHIFT;
     else if(a==8) mapped_key=KEY_TAB;

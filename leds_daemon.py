@@ -28,7 +28,7 @@ with serial.Serial("COM13", 115200) as conn:
 		if conn.inWaiting():
 			print("-->", conn.readline().decode("ascii", "ignore")[:-1])
 		# i=int(input(">"))
-		byte = (int(round(time.time() * 1000))%500>250, get_caplock(), get_numlock(), get_scrlock(), 0, get_islocked(), get_hicpu(), get_isbatt())
+		byte = (int(round(time.time() * 1000))%2000<100, get_caplock(), get_numlock(), get_scrlock(), 0, get_islocked(), get_hicpu(), get_isbatt())
 		num = sum(map(lambda t: 2**t[0] if t[1] else 0, enumerate(byte)))
 		if num==last_num: continue
 		last_num=num
