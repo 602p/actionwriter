@@ -3,8 +3,6 @@
 extern int kb_matrix_mask[13];
 extern char kb_layout[64];
 
-String inString = "";
-int v = 0;
 bool state[64];
 bool old_state[64];
 
@@ -59,6 +57,30 @@ void writeRightAddress(int address){
   digitalWrite(8,  bitRead(address, 2));
 }
 
+void writeUnicode(String value){
+  Keyboard.press(KEY_LEFT_ALT);
+  Keyboard.press(224);
+  delay(1);
+  Keyboard.release(224);
+  int i=0;
+  int v;
+  Serial.println("Typing "+value);
+  while(i<value.length()){
+    if(value[i]=='0') v=234;
+    else if(value[i]>=49 && value[i]<=57) v=value[i]-49+224+1;
+    else v=value[i];
+    Keyboard.press(v);
+    delay(1);
+    Keyboard.release(v);
+    Serial.println(v, DEC);
+    i++;
+  }
+  Keyboard.release(KEY_LEFT_ALT);
+}
+byte computerLeds = 0;
+byte localLeds = 0;
+bool fullWidthMode = false;
+
 void loop() {
   int i=0;
   int z=0;
@@ -73,7 +95,6 @@ void loop() {
       }
       j++;
     }
-    delay(1);
     i++;
   }
 
@@ -116,38 +137,28 @@ void loop() {
     }
     else mapped_key = kb_layout[a];
 
-    
-    if(mapped_key!=0){
-      if(state[a] && !old_state[a]){
-        Keyboard.press(mapped_key);
-//        Serial.print("Press: ");
-//        Serial.println(mapped_key);
-      }else if(!state[a] && old_state[a]){
-        Keyboard.release(mapped_key);
-//        Serial.print("Release: ");
-//        Serial.println(mapped_key);
-      }
+    if(state[a] && !old_state[a]){
+      if(state[3] && kb_layout[a]=='w') fullWidthMode=!fullWidthMode;
+      else if(a==4) writeUnicode("00b2");
+      else if(mapped_key!=0) Keyboard.press(mapped_key);
+    }else if(!state[a] && old_state[a]){
+      if(mapped_key!=0) Keyboard.release(mapped_key);
     }
     a++;
   }
   memcpy(old_state, state, sizeof state);
-  delay(15);
-
-//  int q=0;
-//  while(q<64){
-//    Serial.print(state[q], DEC);
-//    Serial.print(" ");
-//    q++;
-//  }
-//  Serial.println("");
+  delay(10);
 
   if(Serial.available()){
     while(Serial.available()>1) Serial.read();
-    digitalWrite(12, LOW);
-    byte val = Serial.read();
-    val += state[3]*16;
-//    Serial.println(val, BIN);
-    shiftOut(10, 11, MSBFIRST, val);
-    digitalWrite(12, HIGH);
+    computerLeds = Serial.read();
   }
+
+  bitWrite(localLeds, 0, state[3]);
+  bitWrite(localLeds, 1, fullWidthMode);
+
+  digitalWrite(12, LOW);
+  shiftOut(10, 11, MSBFIRST, localLeds);
+  shiftOut(10, 11, MSBFIRST, computerLeds);
+  digitalWrite(12, HIGH);
 }

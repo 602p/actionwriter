@@ -23,7 +23,6 @@ with serial.Serial("COM13", 115200) as conn:
 		if conn.inWaiting():
 			print("-->", conn.readline().decode("ascii", "ignore")[:-1])
 		# i=int(input(">"))
-		#													 v-- HW meta key
 		byte = (i>=2, get_caplock(), get_numlock(), get_scrlock(), 0, get_islocked(), get_hicpu(), get_isbatt())
 		num = sum(map(lambda t: 2**t[0] if t[1] else 0, enumerate(byte)))
 		# print(bin(i))
