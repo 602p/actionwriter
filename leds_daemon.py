@@ -3,6 +3,7 @@ import ctypes
 import time
 import random
 import psutil
+import time
 hllDll = ctypes.WinDLL ("User32.dll")
 get_caplock = lambda: hllDll.GetKeyState(0x14)
 
@@ -14,19 +15,21 @@ get_islocked = lambda: hllDll.GetForegroundWindow() == 0
 
 get_isbatt  = lambda: not psutil.sensors_battery().power_plugged
 
-get_hicpu = lambda: psutil.cpu_percent(percpu=False)>75
+def get_hicpu():
+		c= psutil.cpu_percent(0.05)
+		# print(c)
+		return c>75		
+
+last_num = None
 
 with serial.Serial("COM13", 115200) as conn:
 	print("Opened")
-	i=0
 	while 1:
 		if conn.inWaiting():
 			print("-->", conn.readline().decode("ascii", "ignore")[:-1])
 		# i=int(input(">"))
-		byte = (i>=2, get_caplock(), get_numlock(), get_scrlock(), 0, get_islocked(), get_hicpu(), get_isbatt())
+		byte = (int(round(time.time() * 1000))%500>250, get_caplock(), get_numlock(), get_scrlock(), 0, get_islocked(), get_hicpu(), get_isbatt())
 		num = sum(map(lambda t: 2**t[0] if t[1] else 0, enumerate(byte)))
-		# print(bin(i))
+		if num==last_num: continue
+		last_num=num
 		conn.write(bytes([num]))
-		time.sleep(0.1)
-		i+=1
-		if i==4:i=0

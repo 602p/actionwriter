@@ -112,6 +112,8 @@ void loop() {
     else if(a==6) mapped_key=KEY_CAPS_LOCK;
     else if(a==61) mapped_key=KEY_PAGE_UP;
     else if(a==60) mapped_key=KEY_PAGE_DOWN;
+    else if(a==63) mapped_key=KEY_HOME;
+    else if(a==2) mapped_key=KEY_END;
     else if(state[3]){ //L_MAR
       if(a==40) mapped_key=KEY_LEFT_ARROW;
       else if(a==50) mapped_key=KEY_RIGHT_ARROW;
