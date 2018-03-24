@@ -8,24 +8,25 @@ bool old_state[64];
 
 void setup() {
   // put your setup code here, to run once:
-  int i=2;
+  int i=0;
   while(i<=8){
     pinMode(i, OUTPUT);
     i++;
   }
-  pinMode(9, INPUT_PULLUP);
-
-  pinMode(A1, INPUT_PULLUP);
-  if(!digitalRead(A1)){while(1){
-    digitalWrite(13, HIGH);
-    delay(250);
-    digitalWrite(13, LOW);
-    delay(250);
-   }}
-
+  pinMode(A0, INPUT_PULLUP);
   pinMode(10, OUTPUT);
   pinMode(11, OUTPUT);
   pinMode(12, OUTPUT);
+
+  pinMode(A1, INPUT_PULLUP);
+  if(!digitalRead(A1)){while(1){
+    writeAllLEDS(0,0);
+    delay(250);
+    writeAllLEDS(255,255);
+    delay(250);
+   }}
+
+  
   
   
   Serial.begin(115200);
@@ -42,8 +43,8 @@ void writeLeftAddress(int address){
     address=0; 
   }
 
-  digitalWrite(2,  bitRead(address, 0));
-  digitalWrite(3,  bitRead(address, 1));
+  digitalWrite(0,  bitRead(address, 0));
+  digitalWrite(1,  bitRead(address, 1));
   digitalWrite(4,  bitRead(address, 2));
   digitalWrite(5,  bitRead(address, 3));
 }
@@ -108,7 +109,7 @@ void loop() {
     while(j<8){
       writeRightAddress(j);
       if(bitRead(kb_matrix_mask[i], j)){
-        state[z]=!digitalRead(9);
+        state[z]=!digitalRead(A0);
         z++;
       }
       j++;
@@ -204,8 +205,13 @@ void loop() {
   bitWrite(localLeds, 1, fullWidthMode);
   bitWrite(localLeds, 2, rot13Mode);
 
+  writeAllLEDS(localLeds, computerLeds);
+}
+
+void writeAllLEDS(byte localLeds, byte computerLeds){
   digitalWrite(12, LOW);
   shiftOut(10, 11, MSBFIRST, localLeds);
   shiftOut(10, 11, MSBFIRST, computerLeds);
   digitalWrite(12, HIGH);
 }
+
