@@ -27,10 +27,11 @@ void setup() {
   pinMode(11, OUTPUT);
   pinMode(12, OUTPUT);
   
-  Keyboard.begin();
+  
   Serial.begin(115200);
   while(!Serial){}
-  Serial.println("Ready");
+  Serial.println("Ready_OK_v2");
+  Keyboard.begin();
 
   memset(state, 0, 64);
   memset(old_state, 0, 64);
@@ -77,9 +78,26 @@ void writeUnicode(String value){
   }
   Keyboard.release(KEY_LEFT_ALT);
 }
+
+int rot13(int c){
+  if('a' <= c && c <= 'z'){
+    return rot13b(c,'a');
+  } else if ('A' <= c && c <= 'Z') {
+    return rot13b(c, 'A');
+  } else {
+    return c;
+  }
+}
+
+int rot13b(int c, int basis){
+  c = (((c-basis)+13)%26)+basis;
+  return c;
+}
+
 byte computerLeds = 0;
 byte localLeds = 0;
 bool fullWidthMode = false;
+bool rot13Mode = false;
 
 void loop() {
   int i=0;
@@ -149,14 +167,27 @@ void loop() {
         Serial.print("PRESS ");
         Serial.println(a, DEC);
       }
+      else if(state[3] && kb_layout[a]=='r'){
+        rot13Mode = !rot13Mode;
+      }
       else if(a==4) writeUnicode("00b2");
-      else if(mapped_key!=0) Keyboard.press(mapped_key);
+      else if(mapped_key!=0){
+        if(rot13Mode){
+          mapped_key=rot13(mapped_key);
+        }
+        Keyboard.press(mapped_key);
+      }
     }else if(!state[a] && old_state[a]){
       if(fullWidthMode){
         Serial.print("RELEASE ");
         Serial.println(a, DEC);
       }
-      else if(mapped_key!=0) Keyboard.release(mapped_key);
+      else if(mapped_key!=0){
+        if(rot13Mode){
+          mapped_key=rot13(mapped_key);
+        }
+        Keyboard.release(mapped_key);
+      }
     }
 
     a++;
@@ -171,6 +202,7 @@ void loop() {
 
   bitWrite(localLeds, 0, state[3]);
   bitWrite(localLeds, 1, fullWidthMode);
+  bitWrite(localLeds, 2, rot13Mode);
 
   digitalWrite(12, LOW);
   shiftOut(10, 11, MSBFIRST, localLeds);

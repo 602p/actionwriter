@@ -1,0 +1,25 @@
+Drill report for C:/Users/Louis/Desktop/actionwriter/PCB/Actionwriter_PCB.kicad_pcb
+Created on 3/23/2018 8:36:39 PM
+
+Copper Layer Stackup:
+    =============================================================
+    L1 :  F.Cu                      front
+    L2 :  B.Cu                      back
+
+
+Drill file 'Actionwriter_PCB.drl' contains
+    plated through holes:
+    =============================================================
+    T1  0.40mm  0.016"  (46 holes)
+    T2  0.50mm  0.020"  (1 hole)
+    T3  0.80mm  0.031"  (32 holes)
+    T4  0.90mm  0.035"  (32 holes)
+
+    Total plated holes count 111
+
+
+Drill file 'Actionwriter_PCB-NPTH.drl' contains
+    unplated through holes:
+    =============================================================
+
+    Total unplated holes count 0
