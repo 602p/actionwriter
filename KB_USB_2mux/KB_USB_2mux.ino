@@ -6,6 +6,8 @@ extern char kb_layout[64];
 bool state[64];
 bool old_state[64];
 
+bool serial_enabled;
+
 void setup() {
   // put your setup code here, to run once:
   int i=0;
@@ -19,6 +21,7 @@ void setup() {
   pinMode(12, OUTPUT);
 
   pinMode(A1, INPUT_PULLUP);
+  pinMode(A2, INPUT_PULLUP);
   if(!digitalRead(A1)){while(1){
     writeAllLEDS(0,0);
     delay(250);
@@ -26,12 +29,13 @@ void setup() {
     delay(250);
    }}
 
+   serial_enabled = digitalRead(A2);  
   
-  
-  
-  Serial.begin(115200);
-  while(!Serial){}
-  Serial.println("Ready_OK_v2");
+  if(serial_enabled){
+      Serial.begin(115200);
+      while(!Serial){}
+      Serial.println("Ready_OK_v2");
+  }
   Keyboard.begin();
 
   memset(state, 0, 64);
@@ -161,17 +165,17 @@ void loop() {
     if(state[a] && !old_state[a]){
       if(state[3] && kb_layout[a]=='w'){
         fullWidthMode=!fullWidthMode;
-        if(fullWidthMode) Serial.println("START FULLWIDTH");
-        else Serial.println("STOP FULLWIDTH");
+        if(fullWidthMode && serial_enabled) Serial.println("START FULLWIDTH");
+        else if (serial_enabled) Serial.println("STOP FULLWIDTH");
       }
-      else if(fullWidthMode){
+      else if(fullWidthMode && serial_enabled){
         Serial.print("PRESS ");
         Serial.println(a, DEC);
       }
       else if(state[3] && kb_layout[a]=='r'){
         rot13Mode = !rot13Mode;
       }
-      else if(a==4) writeUnicode("00b2");
+//      else if(a==4) writeUnicode("00b2");
       else if(mapped_key!=0){
         if(rot13Mode){
           mapped_key=rot13(mapped_key);
@@ -179,7 +183,7 @@ void loop() {
         Keyboard.press(mapped_key);
       }
     }else if(!state[a] && old_state[a]){
-      if(fullWidthMode){
+      if(fullWidthMode && serial_enabled){
         Serial.print("RELEASE ");
         Serial.println(a, DEC);
       }
@@ -196,9 +200,13 @@ void loop() {
   memcpy(old_state, state, sizeof state);
   delay(10);
 
-  if(Serial.available()){
-    while(Serial.available()>1) Serial.read();
-    computerLeds = Serial.read();
+  if(serial_enabled){
+    if(Serial.available()){
+      while(Serial.available()>1) Serial.read();
+      computerLeds = Serial.read();
+    }
+  }else{
+    bitWrite(computerLeds, 0, 1);
   }
 
   bitWrite(localLeds, 0, state[3]);
