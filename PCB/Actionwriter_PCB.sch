@@ -74,7 +74,7 @@ U 1 1 5AB5FEBC
 P 5100 7450
 F 0 "J10" H 5100 8250 50  0000 C CNN
 F 1 "KBD_RHS" H 5100 6550 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Straight_1x14_Pitch2.54mm" H 5100 7450 50  0001 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x16_Pitch2.54mm" H 5100 7450 50  0001 C CNN
 F 3 "" H 5100 7450 50  0001 C CNN
 	1    5100 7450
 	0    -1   1    0   
