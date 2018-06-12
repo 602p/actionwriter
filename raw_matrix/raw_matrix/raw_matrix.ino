@@ -19,18 +19,19 @@ void setup(){
 	Serial.begin(115200);
 	while (!Serial); //Initialize serial port and wait for connection
 	// Keyboard.begin();
+	writeAllLEDS(0, 0);
 }
 
 void loop(){
 	Serial.print("[");
-	for(int col=0; col<=12; col++){
+	for(int col=0; col<=15; col++){
 		writeLeftAddress(col);
 		for(int row=0; row<=7; row++){
 			Serial.print(writeRightAddress(row));
 		}
 	}
 	Serial.println("]");
-	writeAllLEDS(0, 0);
+	
 	delay(10); //Randomly determined
 }
 
