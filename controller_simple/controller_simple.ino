@@ -1,3 +1,5 @@
+#include <Keyboard.h>
+
 const int COL_ADDRESS_PINS[4] = {0, 1, 4, 5};
 const int ROW_ADDRESS_PINS[3] = {6, 7, 8};
 const int ROW_READ_PIN = A0;
@@ -18,6 +20,8 @@ const unsigned char MASK[13] = {
 	0b01111011
 };
 
+const unsigned char MAP[64] = {KEY_LEFT_GUI, ' ', '?', '?', '?', '?', KEY_LEFT_CTRL, KEY_LEFT_ALT, '\t', KEY_ESC, '?', KEY_LEFT_SHIFT, 'z', 'q', '1', '~', 'a', 'x', 'w', '2', 's', 'c', 'e', '3', 'd', 'b', 'v', 't', 'r', '4', '5', 'f', 'g', 'n', 'm', 'y', 'u', '7', '6', 'j', 'h', ',', ']', 'i', '8', '+', 'k', '.', 'o', '9', 'l', '/', '[', 'p', '0', '-', ';', '\'', '?', KEY_RETURN, '?', '?', KEY_BACKSPACE, '?'};
+
 bool state[64];
 bool old_state[64];
 
@@ -34,8 +38,9 @@ void setup(){
 	pinMode(12, OUTPUT);
 	writeAllLEDS(0, 0);
 
-	Serial.begin(115200);
-	while (!Serial); //Initialize serial port and wait for connection
+	// Serial.begin(115200);
+	// while (!Serial); //Initialize serial port and wait for connection
+	Keyboard.begin();
 
 	memset(old_state, 0, sizeof state);
 }
@@ -55,9 +60,19 @@ void loop(){
 	}
 	
 	for(int i=0; i<64; i++){
-		Serial.print(state[i]);
+		if(state[i] && !old_state[i]){
+			Keyboard.press(MAP[i]);
+			// Serial.print("press ");
+			// Serial.println(MAP[i]);
+		}else if(!state[i] && old_state[i]){
+			Keyboard.release(MAP[i]);
+			// Serial.print("release ");
+			// Serial.println(MAP[i]);
+		}
 	}
-	Serial.println("");
+
+	memcpy(old_state, state, sizeof state);
+	delay(10);
 }
 
 void setColumnHigh(int address){
