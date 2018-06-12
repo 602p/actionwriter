@@ -5,10 +5,10 @@ const int ROW_READ_PIN = A0;
 void setup(){
 	//Configure the pins. Switch circuit is closed when it's low, so set the
 	// input pin to be high by default
+	int i;
+	for(i=0; i<4; i++) pinMode(COL_ADDRESS_PINS[i], OUTPUT);
+	for(i=0; i<3; i++) pinMode(ROW_ADDRESS_PINS[i], OUTPUT);
 	pinMode(ROW_READ_PIN, INPUT_PULLUP);
-	for(int i=0; i<4; i++) pinMode(COL_ADDRESS_PINS[i], OUTPUT);
-	for(int i=0; i<3; i++) pinMode(ROW_ADDRESS_PINS[i], OUTPUT);
-
 
 	Serial.begin(115200);
 	while (!Serial); //Initialize serial port and wait for connection
@@ -27,7 +27,7 @@ void loop(){
 }
 
 void setColumnHigh(int address){
-  if(!((address>=0)&&(address<=15))) address=0;
+  // if(!((address>=0)&&(address<=15))) address=0;
 
   digitalWrite(COL_ADDRESS_PINS[0],  bitRead(address, 0));
   digitalWrite(COL_ADDRESS_PINS[1],  bitRead(address, 1));
@@ -36,7 +36,7 @@ void setColumnHigh(int address){
 }
 
 bool readRow(int address){
-  if(!((address>=0)&&(address<=7))) address=0;
+  // if(!((address>=0)&&(address<=7))) address=0;
 
   digitalWrite(ROW_ADDRESS_PINS[0],  bitRead(address, 0));
   digitalWrite(ROW_ADDRESS_PINS[1],  bitRead(address, 1));
