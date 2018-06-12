@@ -16,7 +16,7 @@ void setup(){
 
 void loop(){
 	Serial.print("[");
-	for(int col=0; col<=13; col++){
+	for(int col=0; col<=15; col++){
 		setColumnHigh(col);
 		for(int row=0; row<=7; row++){
 			Serial.print(readRow(row));

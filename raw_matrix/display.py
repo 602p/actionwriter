@@ -1,7 +1,7 @@
 import serial, pygame, json
 
 SQUARE_SIZE=60
-WIDTH=13
+WIDTH=16
 HEIGHT=8
 
 def chunks(l, n):
@@ -24,7 +24,8 @@ with serial.Serial("/dev/ttyACM0", 115200) as conn:
 		data=conn.readline().decode("ascii", "ignore").strip()
 		if data[0]=="[" and data[-1]=="]":
 			data=data[1:-1]
-			if len(data)==112:
+			print(data)
+			if len(data)==WIDTH*HEIGHT:
 				columns = list(chunks(list(map(int, data)),8))
 				for col, lst in enumerate(columns):
 					for row, v in enumerate(lst):
