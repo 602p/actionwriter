@@ -21,31 +21,21 @@ void setup(){
 
 void loop(){
 	Serial.print("[");
-	for(int col=0; col<=15; col++){
+	for(int col=0; col<16; col++){
 		setColumnHigh(col);
-		for(int row=0; row<=7; row++){
+		for(int row=0; row<8; row++){
 			Serial.print(readRow(row));
 		}
 	}
 	Serial.println("]");
-	
-	delay(10); //Randomly determined
 }
 
 void setColumnHigh(int address){
-	if(!((address>=0)&&(address<=15))){
-		address=0; 
-	}
-
 	for(int i=0; i<4; i++)
 		digitalWrite(COL_ADDRESS_PINS[i], bitRead(address, i));
 }
 
 bool readRow(int address){
-	if(!((address>=0)&&(address<=7))){
-		address=0; 
-	}
-
 	for(int i=0; i<3; i++)
 		digitalWrite(ROW_ADDRESS_PINS[i], bitRead(address, i));
 
