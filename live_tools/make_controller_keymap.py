@@ -1,4 +1,5 @@
 from mapping import mapping
+import json, sys
 
 columns=[[] for _ in range(13)]
 for pos in mapping.keys():
@@ -10,52 +11,17 @@ for col, entries in enumerate(columns):
 		keymap.append(mapping[(col, row)])
 
 print(keymap)
+print()
+
+with open("defines.c", 'w') as fd:
+	for idx, item in enumerate(keymap):
+		fd.write("\n#define LK_"+item+" "+str(idx))
+
+with open(sys.argv[1], 'r') as fd:
+	layout=json.load(fd)
 
 for_arduino=[]
 for item in keymap:
-	if len(item)==1 and item in "abcdefghijklmnopqrstuvwxyz":
-		for_arduino.append("'%s'"%item)
-	else:
-		for_arduino.append({
-			"code": 	"KEY_LEFT_GUI",
-			"mar_rel": 	"KEY_ESC",
-			"l_mar": 	"'?'",
-			"r_mar": 	"KEY_LEFT_ALT",
-			"lock": 	"KEY_LEFT_CTRL",
-			"t_set":	"'?'",
-			"t_clr":	"'?'",
-			"space":	"' '",
-			"shift":	"KEY_LEFT_SHIFT",
-			"backspace":"KEY_BACKSPACE",
-			"return":	"KEY_RETURN",
-			"comma":	"','",
-			"period":	"'.'",
-			"slash":	"'/'",
-			"colon":	"':'",
-			"quote":	"'\\''",
-			"fraction":	"'['",
-			"bracket":	"']'",
-			"minus":	"'-'",
-			"plus":		"'+'",
-			"one":		"'1'",
-			"two":		"'2'",
-			"three":	"'3'",
-			"four":		"'4'",
-			"five":		"'5'",
-			"six":		"'6'",
-			"seven":	"'7'",
-			"eight":	"'8'",
-			"nine":		"'9'",
-			"zero":		"'0'",
-			"paper_up":	"'?'",
-			"paper_down":"'?'",
-			"margin_return":"'?'",
-			"repeat":	"'?'",
-			"line_space":"'?'",
-			"delete":	"'?'",
-			"tab":		"'\\t'",
-			"topleft":	"'~'",
-			"semicolon":"';'"
-		}[item])
+	for_arduino.append(layout[item])
 
 print(", ".join(for_arduino))
