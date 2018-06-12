@@ -1,5 +1,7 @@
 import serial, pygame, json
 
+import mapping
+
 SQUARE_SIZE=60
 WIDTH=16
 HEIGHT=8
@@ -9,14 +11,15 @@ def chunks(l, n):
 	for i in range(0, len(l), n):
 		yield l[i:i + n]
 
-seen=[]
+seen=list(mapping.mapping.keys())
 
 with serial.Serial("/dev/ttyACM0", 115200) as conn:
 	conn.readline()
 	conn.readline()
 
 	pygame.init()
-	font = pygame.font.SysFont("monospace", 14)
+	fontb = pygame.font.SysFont("Arial", 12, True)
+	font = pygame.font.SysFont("Arial", 14, False)
 	screen = pygame.display.set_mode((WIDTH*SQUARE_SIZE, HEIGHT*SQUARE_SIZE))
 	run=1
 	while run:
@@ -33,11 +36,12 @@ with serial.Serial("/dev/ttyACM0", 115200) as conn:
 							if not (col, row) in seen:
 								seen.append((col, row))
 						elif (col, row) in seen:
-							color = (60, 60, 60)
+							color = (100, 100, 100)
 						else:
 							color = (30, 30, 30)
 						pygame.draw.rect(screen, color, (SQUARE_SIZE*col, SQUARE_SIZE*row, SQUARE_SIZE, SQUARE_SIZE))
 						screen.blit(font.render(str((col, row)), False, (200,200,200)), (SQUARE_SIZE*col, SQUARE_SIZE*row))
+						screen.blit(fontb.render(mapping.mapping.get((col, row), ""), False, (255,255,255)), (SQUARE_SIZE*col, SQUARE_SIZE*row+15))
 			else: print('len err')
 		else: print('fmt err')
 
@@ -45,3 +49,5 @@ with serial.Serial("/dev/ttyACM0", 115200) as conn:
 			if e.type==pygame.KEYDOWN and e.key==pygame.K_q:
 				run=False
 		pygame.display.flip()
+		pygame.image.save(screen, "map.png")
+		run=False

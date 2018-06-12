@@ -1,5 +1,3 @@
-// #include <Keyboard.h>
-
 const int COL_ADDRESS_PINS[4] = {0, 1, 4, 5};
 const int ROW_ADDRESS_PINS[3] = {6, 7, 8};
 const int ROW_READ_PIN = A0;
@@ -7,27 +5,26 @@ const int ROW_READ_PIN = A0;
 void setup(){
 	//Configure the pins. Switch circuit is closed when it's low, so set the
 	// input pin to be high by default
-	// int i;
+	pinMode(ROW_READ_PIN, INPUT_PULLUP);
 	for(int i=0; i<4; i++) pinMode(COL_ADDRESS_PINS[i], OUTPUT);
 	for(int i=0; i<3; i++) pinMode(ROW_ADDRESS_PINS[i], OUTPUT);
-	pinMode(ROW_READ_PIN, INPUT_PULLUP);
 
+	//Set up shift register. Nasal demons attack without this
 	pinMode(10, OUTPUT);
 	pinMode(11, OUTPUT);
 	pinMode(12, OUTPUT);
+	writeAllLEDS(0, 0);
 
 	Serial.begin(115200);
 	while (!Serial); //Initialize serial port and wait for connection
-	// Keyboard.begin();
-	writeAllLEDS(0, 0);
 }
 
 void loop(){
 	Serial.print("[");
 	for(int col=0; col<=15; col++){
-		writeLeftAddress(col);
+		setColumnHigh(col);
 		for(int row=0; row<=7; row++){
-			Serial.print(writeRightAddress(row));
+			Serial.print(readRow(row));
 		}
 	}
 	Serial.println("]");
@@ -35,7 +32,7 @@ void loop(){
 	delay(10); //Randomly determined
 }
 
-void writeLeftAddress(int address){
+void setColumnHigh(int address){
 	if(!((address>=0)&&(address<=15))){
 		address=0; 
 	}
@@ -44,7 +41,7 @@ void writeLeftAddress(int address){
 		digitalWrite(COL_ADDRESS_PINS[i], bitRead(address, i));
 }
 
-bool writeRightAddress(int address){
+bool readRow(int address){
 	if(!((address>=0)&&(address<=7))){
 		address=0; 
 	}
