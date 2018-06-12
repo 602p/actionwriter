@@ -7,16 +7,14 @@ const int ROW_READ_PIN = A0;
 void setup(){
 	//Configure the pins. Switch circuit is closed when it's low, so set the
 	// input pin to be high by default
-	int i;
-	for(i=0; i<4; i++) pinMode(COL_ADDRESS_PINS[i], OUTPUT);
-	for(i=0; i<3; i++) pinMode(ROW_ADDRESS_PINS[i], OUTPUT);
+	// int i;
+	for(int i=0; i<4; i++) pinMode(COL_ADDRESS_PINS[i], OUTPUT);
+	for(int i=0; i<3; i++) pinMode(ROW_ADDRESS_PINS[i], OUTPUT);
 	pinMode(ROW_READ_PIN, INPUT_PULLUP);
 
 	pinMode(10, OUTPUT);
 	pinMode(11, OUTPUT);
 	pinMode(12, OUTPUT);
-
-	
 
 	Serial.begin(115200);
 	while (!Serial); //Initialize serial port and wait for connection
@@ -28,7 +26,6 @@ void loop(){
 	for(int col=0; col<=12; col++){
 		writeLeftAddress(col);
 		for(int row=0; row<=7; row++){
-			
 			Serial.print(writeRightAddress(row));
 		}
 	}
@@ -41,11 +38,6 @@ void writeLeftAddress(int address){
 	if(!((address>=0)&&(address<=15))){
 		address=0; 
 	}
-
-	// digitalWrite(COL_ADDRESS_PINS[0],  bitRead(address, 0));
-	// digitalWrite(COL_ADDRESS_PINS[1],  bitRead(address, 1));
-	// digitalWrite(COL_ADDRESS_PINS[2],  bitRead(address, 2));
-	// digitalWrite(COL_ADDRESS_PINS[3],  bitRead(address, 3));
 
 	for(int i=0; i<4; i++)
 		digitalWrite(COL_ADDRESS_PINS[i], bitRead(address, i));
