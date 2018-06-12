@@ -10,6 +10,8 @@ for col in columns:
 
 bitmasks=[]
 for mask in masks:
-	bitmasks.append("0b"+"".join(map(str, map(int, mask))))
+	bits=map(str, map(int, reversed(mask)))
+	#make bitstring, switch endian
+	bitmasks.append("0b"+"".join(bits))
 
 print(bitmasks)
