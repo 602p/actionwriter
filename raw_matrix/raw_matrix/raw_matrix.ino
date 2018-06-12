@@ -1,3 +1,5 @@
+// #include <Keyboard.h>
+
 const int COL_ADDRESS_PINS[4] = {0, 1, 4, 5};
 const int ROW_ADDRESS_PINS[3] = {6, 7, 8};
 const int ROW_READ_PIN = A0;
@@ -10,37 +12,60 @@ void setup(){
 	for(i=0; i<3; i++) pinMode(ROW_ADDRESS_PINS[i], OUTPUT);
 	pinMode(ROW_READ_PIN, INPUT_PULLUP);
 
+	pinMode(10, OUTPUT);
+	pinMode(11, OUTPUT);
+	pinMode(12, OUTPUT);
+
+	
+
 	Serial.begin(115200);
 	while (!Serial); //Initialize serial port and wait for connection
+	// Keyboard.begin();
 }
 
 void loop(){
 	Serial.print("[");
-	for(int col=0; col<=15; col++){
-		setColumnHigh(col);
+	for(int col=0; col<=12; col++){
+		writeLeftAddress(col);
 		for(int row=0; row<=7; row++){
-			Serial.print(readRow(row));
+			
+			Serial.print(writeRightAddress(row));
 		}
 	}
 	Serial.println("]");
-	delay(4); //Randomly determined
+	writeAllLEDS(0, 0);
+	delay(10); //Randomly determined
 }
 
-void setColumnHigh(int address){
-  // if(!((address>=0)&&(address<=15))) address=0;
+void writeLeftAddress(int address){
+	if(!((address>=0)&&(address<=15))){
+		address=0; 
+	}
 
-  digitalWrite(COL_ADDRESS_PINS[0],  bitRead(address, 0));
-  digitalWrite(COL_ADDRESS_PINS[1],  bitRead(address, 1));
-  digitalWrite(COL_ADDRESS_PINS[2],  bitRead(address, 2));
-  digitalWrite(COL_ADDRESS_PINS[3],  bitRead(address, 3));
+	// digitalWrite(COL_ADDRESS_PINS[0],  bitRead(address, 0));
+	// digitalWrite(COL_ADDRESS_PINS[1],  bitRead(address, 1));
+	// digitalWrite(COL_ADDRESS_PINS[2],  bitRead(address, 2));
+	// digitalWrite(COL_ADDRESS_PINS[3],  bitRead(address, 3));
+
+	for(int i=0; i<4; i++)
+		digitalWrite(COL_ADDRESS_PINS[i], bitRead(address, i));
 }
 
-bool readRow(int address){
-  // if(!((address>=0)&&(address<=7))) address=0;
+bool writeRightAddress(int address){
+	if(!((address>=0)&&(address<=7))){
+		address=0; 
+	}
 
-  digitalWrite(ROW_ADDRESS_PINS[0],  bitRead(address, 0));
-  digitalWrite(ROW_ADDRESS_PINS[1],  bitRead(address, 1));
-  digitalWrite(ROW_ADDRESS_PINS[2],  bitRead(address, 2));
+	for(int i=0; i<3; i++)
+		digitalWrite(ROW_ADDRESS_PINS[i], bitRead(address, i));
 
-  return !digitalRead(ROW_READ_PIN);
+	return !digitalRead(ROW_READ_PIN);
 }
+
+void writeAllLEDS(byte localLeds, byte computerLeds){
+	digitalWrite(12, LOW);
+	shiftOut(10, 11, MSBFIRST, localLeds);
+	shiftOut(10, 11, MSBFIRST, computerLeds);
+	digitalWrite(12, HIGH);
+}
+

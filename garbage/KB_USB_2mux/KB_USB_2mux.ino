@@ -114,12 +114,14 @@ void loop() {
       writeRightAddress(j);
       if(bitRead(kb_matrix_mask[i], j)){
         state[z]=!digitalRead(A0);
+        Serial.print(state[z]);
         z++;
       }
       j++;
     }
     i++;
   }
+  Serial.println("");
 
   int a=0;
   int mapped_key;
