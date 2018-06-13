@@ -47,9 +47,9 @@ enum {
 } mode = M_DEFAULT;
 
 bool dip_config[8];
-#define CFG_flashmode (dip_config[0])
-#define CFG_serial_on (dip_config[1])
-#define CFG_usbkbd_on (dip_config[2])
+#define CFG_flashmode dip_config[0]
+#define CFG_serial_on dip_config[1]
+#define CFG_usbkbd_on dip_config[2]
 
 bool state[64];
 bool old_state[64];
@@ -90,7 +90,7 @@ void setup(){
 			writeAllLEDS(0, (char)((millis()%600)<200));
 		}
 		Serial.println("controller online");
-		Serial.print("Config bits: ");
+		Serial.print("config bits: ");
 		Serial.println(dip_config_int, BIN);
 		Serial.println("(CFG_flashmode = 0)");
 		Serial.println("(CFG_serial_on = 1)");
@@ -98,7 +98,9 @@ void setup(){
 		Serial.print(CFG_usbkbd_on);
 		Serial.println(")");
 	}
-	if(CFG_usbkbd_on) Keyboard.begin();
+	if(CFG_usbkbd_on){
+		Keyboard.begin();
+	}
 
 	memset(old_state, 0, sizeof state);
 }
@@ -160,7 +162,9 @@ void keydown(int code){
 
 	unsigned char mapped_code = xf_mapped(code);
 	
-	if(CFG_usbkbd_on && mode!=M_SERIAL) Keyboard.press(mapped_code);
+	if(CFG_usbkbd_on && mode!=M_SERIAL){
+		Keyboard.press(mapped_code);
+	}
 	if(CFG_serial_on && mode==M_SERIAL){
 		Serial.print("P");
 		Serial.println(code);
@@ -172,7 +176,9 @@ void keyup(int code){
 
 	unsigned char mapped_code = xf_mapped(code);
 
-	if(CFG_usbkbd_on && mode!=M_SERIAL) Keyboard.release(mapped_code);
+	if(CFG_usbkbd_on && mode!=M_SERIAL){
+		Keyboard.release(mapped_code);
+	}
 	if(CFG_serial_on && mode==M_SERIAL){
 		Serial.print("R");
 		Serial.println(code);

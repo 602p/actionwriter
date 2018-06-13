@@ -1,4 +1,4 @@
-const int COL_ADDRESS_PINS[4] = {0, 1, 4, 5};
+const int COL_ADDRESS_PINS[4] = {2, 3, 4, 5};
 const int ROW_ADDRESS_PINS[3] = {6, 7, 8};
 const int ROW_READ_PIN = A0;
 
