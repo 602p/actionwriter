@@ -47,9 +47,8 @@ enum {
 } mode = M_DEFAULT;
 
 bool dip_config[8];
-#define CFG_flashmode dip_config[0]
+#define CFG_usbkbd_on dip_config[0]
 #define CFG_serial_on dip_config[1]
-#define CFG_usbkbd_on dip_config[2]
 
 bool state[64];
 bool old_state[64];
@@ -77,7 +76,7 @@ void setup(){
 	int dip_config_int=0;
 	for(int i=0; i<8; i++) bitWrite(dip_config_int, i, dip_config[i]);
 	
-	while(CFG_flashmode){
+	while(!CFG_serial_on && !CFG_usbkbd_on){
 		writeAllLEDS(255, 255);
 		delay(200);
 		writeAllLEDS(0, 0);
@@ -92,7 +91,6 @@ void setup(){
 		Serial.println("controller online");
 		Serial.print("config bits: ");
 		Serial.println(dip_config_int, BIN);
-		Serial.println("(CFG_flashmode = 0)");
 		Serial.println("(CFG_serial_on = 1)");
 		Serial.print("(CFG_usbkbd_on = ");
 		Serial.print(CFG_usbkbd_on);
@@ -135,6 +133,11 @@ void loop(){
 	bitWrite(leds1, 1, mode==M_DEFAULT);
 	bitWrite(leds1, 2, mode==M_ROT13);
 	bitWrite(leds1, 3, mode==M_SERIAL);
+
+	if(CFG_serial_on){
+
+	}
+	
 	writeAllLEDS(leds1, leds2);
 
 	memcpy(old_state, state, sizeof state);
