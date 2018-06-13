@@ -20,7 +20,7 @@ with serial.Serial("/dev/ttyACM0", 115200) as conn:
 	pygame.init()
 	fontb = pygame.font.SysFont("Arial", 12, True)
 	font = pygame.font.SysFont("Arial", 14, False)
-	screen = pygame.display.set_mode((13*SQUARE_SIZE, HEIGHT*SQUARE_SIZE))
+	screen = pygame.display.set_mode((WIDTH*SQUARE_SIZE, HEIGHT*SQUARE_SIZE))
 	run=1
 	while run:
 		screen.fill((0,0,0))

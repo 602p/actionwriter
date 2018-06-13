@@ -1,7 +1,7 @@
 #include <Keyboard.h>
 #include "defines.c"
 
-const int COL_ADDRESS_PINS[4] = {0, 1, 4, 5};
+const int COL_ADDRESS_PINS[4] = {2, 3, 4, 5};
 const int ROW_ADDRESS_PINS[3] = {6, 7, 8};
 const int ROW_READ_PIN = A0;
 
@@ -21,19 +21,35 @@ const unsigned char MASK[13] = {
 	0b01111011
 };
 
-#define USERKEY_MACRO1 1
-#define USERKEY_MACRO2 2
-
 #define LK_META LK_l_mar
 
-const unsigned char DEFAULT_MAP[64] = {KEY_LEFT_GUI, ' ', KEY_END, 0 /*HWMeta*/, USERKEY_MACRO2, KEY_DELETE, KEY_LEFT_CTRL, KEY_LEFT_ALT, '\t', KEY_ESC, USERKEY_MACRO1, KEY_LEFT_SHIFT, 'z', 'q', '1', '`', 'a', 'x', 'w', '2', 's', 'c', 'e', '3', 'd', 'b', 'v', 't', 'r', '4', '5', 'f', 'g', 'n', 'm', 'y', 'u', '7', '6', 'j', 'h', ',', ']', 'i', '8', '+', 'k', '.', 'o', '9', 'l', '/', '[', 'p', '0', '-', ';', '\'', KEY_INSERT, KEY_RETURN, KEY_PAGE_DOWN, KEY_PAGE_UP, KEY_BACKSPACE, KEY_HOME};
-const unsigned char ROT13_MAP[64]   = {KEY_LEFT_GUI, ' ', KEY_END, 0 /*HWMeta*/, USERKEY_MACRO2, KEY_DELETE, KEY_LEFT_CTRL, KEY_LEFT_ALT, '\t', KEY_ESC, USERKEY_MACRO1, KEY_LEFT_SHIFT, 'm', 'd', '6', '`', 'n', 'k', 'j', '7', 'f', 'p', 'r', '8', 'q', 'o', 'i', 'g', 'e', '9', '0', 's', 't', 'a', 'z', 'l', 'h', '2', '1', 'w', 'u', ',', ']', 'v', '3', '+', 'x', '.', 'b', '4', 'y', '/', '[', 'c', '5', '-', ';', '\'', KEY_INSERT, KEY_RETURN, KEY_PAGE_DOWN, KEY_PAGE_UP, KEY_BACKSPACE, KEY_HOME};
+const unsigned char DEFAULT_MAP[64] = {KEY_LEFT_GUI, ' ', KEY_END, 0 /*HWMeta*/,
+	0 /*unused*/, KEY_DELETE, KEY_LEFT_CTRL, KEY_LEFT_ALT, '\t', KEY_ESC,
+	0 /*unused*/, KEY_LEFT_SHIFT, 'z', 'q', '1', '`', 'a', 'x', 'w', '2',
+	's', 'c', 'e', '3', 'd', 'b', 'v', 't', 'r', '4', '5', 'f', 'g', 'n', 'm',
+	'y', 'u', '7', '6', 'j', 'h', ',', ']', 'i', '8', '+', 'k', '.', 'o', '9',
+	'l', '/', '[', 'p', '0', '-', ';', '\'', KEY_INSERT, KEY_RETURN,
+	KEY_PAGE_DOWN, KEY_PAGE_UP, KEY_BACKSPACE, KEY_HOME};
+
+
+const unsigned char ROT13_MAP[64]   = {KEY_LEFT_GUI, ' ', KEY_END, 0 /*HWMeta*/,
+	0 /*unused*/, KEY_DELETE, KEY_LEFT_CTRL, KEY_LEFT_ALT, '\t', KEY_ESC,
+	0 /*unused*/, KEY_LEFT_SHIFT, 'm', 'd', '6', '`', 'n', 'k', 'j', '7', 'f',
+	'p', 'r', '8', 'q', 'o', 'i', 'g', 'e', '9', '0', 's', 't', 'a', 'z', 'l',
+	'h', '2', '1', 'w', 'u', ',', ']', 'v', '3', '+', 'x', '.', 'b', '4', 'y',
+	'/', '[', 'c', '5', '-', ';', '\'', KEY_INSERT, KEY_RETURN, KEY_PAGE_DOWN,
+	KEY_PAGE_UP, KEY_BACKSPACE, KEY_HOME};
 
 enum {
 	M_DEFAULT,
-	M_ROT13
+	M_ROT13,
+	M_SERIAL
 } mode = M_DEFAULT;
 
+bool dip_config[8];
+#define CFG_flashmode (dip_config[0])
+#define CFG_serial_on (dip_config[1])
+#define CFG_usbkbd_on (dip_config[2])
 
 bool state[64];
 bool old_state[64];
@@ -51,9 +67,38 @@ void setup(){
 	pinMode(12, OUTPUT);
 	writeAllLEDS(0, 0);
 
-	// Serial.begin(115200);
-	// while (!Serial); //Initialize serial port and wait for connection
-	Keyboard.begin();
+	bool config = 0;
+	setColumnHigh(13);
+	for(int i=0; i<8; i++){
+		bool b = readRow(i);
+		dip_config[i] = b;
+	}
+
+	int dip_config_int=0;
+	for(int i=0; i<8; i++) bitWrite(dip_config_int, i, dip_config[i]);
+	
+	while(CFG_flashmode){
+		writeAllLEDS(255, 255);
+		delay(200);
+		writeAllLEDS(0, 0);
+		delay(200);
+	}
+
+	if(CFG_serial_on){
+		Serial.begin(115200);
+		while (!Serial){ //Initialize serial port and wait for connection
+			writeAllLEDS(0, (char)((millis()%600)<200));
+		}
+		Serial.println("controller online");
+		Serial.print("Config bits: ");
+		Serial.println(dip_config_int, BIN);
+		Serial.println("(CFG_flashmode = 0)");
+		Serial.println("(CFG_serial_on = 1)");
+		Serial.print("(CFG_usbkbd_on = ");
+		Serial.print(CFG_usbkbd_on);
+		Serial.println(")");
+	}
+	if(CFG_usbkbd_on) Keyboard.begin();
 
 	memset(old_state, 0, sizeof state);
 }
@@ -68,15 +113,10 @@ void loop(){
 			if(bitRead(MASK[col], row)){
 				state[state_pos] = readRow(row);
 				state_pos++;
+				delayMicroseconds(100);
 			}
 		}
 	}
-
-	char leds = 0;
-	bitWrite(leds, 0, state[LK_META]);
-	bitWrite(leds, 1, mode==M_DEFAULT);
-	bitWrite(leds, 2, state[LK_space]);
-	writeAllLEDS(leds, 0);
 	
 	for(int i=0; i<64; i++){
 		if(state[i] && !old_state[i]){
@@ -86,7 +126,17 @@ void loop(){
 		}
 	}
 
+	char leds1 = 0;
+	char leds2 = 0;
+	bitWrite(leds1, 0, CFG_usbkbd_on);
+	bitWrite(leds2, 0, CFG_serial_on);
+	bitWrite(leds1, 1, mode==M_DEFAULT);
+	bitWrite(leds1, 2, mode==M_ROT13);
+	bitWrite(leds1, 3, mode==M_SERIAL);
+	writeAllLEDS(leds1, leds2);
+
 	memcpy(old_state, state, sizeof state);
+
 	delay(5);
 }
 
@@ -96,22 +146,50 @@ void keydown(int code){
 		return;
 	}
 
-	if(mode==M_ROT13 && state[LK_META] && (code==LK_r || code==LK_mar_rel)){
+	if(mode==M_DEFAULT && state[LK_META] && code==LK_s){
+		mode=M_SERIAL;
+		return;
+	}
+
+	if(mode!=M_DEFAULT && state[LK_META] && code==LK_mar_rel){
 		mode=M_DEFAULT;
 		return;
 	}
 
 	if(code==LK_META) return;
 
-	const unsigned char* active_map = mode==M_DEFAULT?DEFAULT_MAP:ROT13_MAP;
-	Keyboard.press(active_map[code]);
+	unsigned char mapped_code = xf_mapped(code);
+	
+	if(CFG_usbkbd_on && mode!=M_SERIAL) Keyboard.press(mapped_code);
+	if(CFG_serial_on && mode==M_SERIAL){
+		Serial.print("P");
+		Serial.println(code);
+	}
 }
 
 void keyup(int code){
 	if(code==LK_META) return;
 
-	const unsigned char* active_map = mode==M_DEFAULT?DEFAULT_MAP:ROT13_MAP;
-	Keyboard.release(active_map[code]);
+	unsigned char mapped_code = xf_mapped(code);
+
+	if(CFG_usbkbd_on && mode!=M_SERIAL) Keyboard.release(mapped_code);
+	if(CFG_serial_on && mode==M_SERIAL){
+		Serial.print("R");
+		Serial.println(code);
+	}
+}
+
+unsigned char xf_mapped(int code){
+	const unsigned char* active_map = mode==M_ROT13?ROT13_MAP:DEFAULT_MAP;
+	unsigned char mapped_code = active_map[code];
+
+	if(state[LK_META] && code==LK_bracket) mapped_code='\\';
+	if(state[LK_META] && code==LK_k) mapped_code=KEY_UP_ARROW;
+	if(state[LK_META] && code==LK_j) mapped_code=KEY_DOWN_ARROW;
+	if(state[LK_META] && code==LK_h) mapped_code=KEY_LEFT_ARROW;
+	if(state[LK_META] && code==LK_l) mapped_code=KEY_RIGHT_ARROW;
+
+	return mapped_code;
 }
 
 void setColumnHigh(int address){
@@ -126,10 +204,9 @@ bool readRow(int address){
 	return !digitalRead(ROW_READ_PIN);
 }
 
-void writeAllLEDS(byte localLeds, byte computerLeds){
+void writeAllLEDS(byte computerLeds, byte localLeds){
 	digitalWrite(12, LOW);
 	shiftOut(10, 11, MSBFIRST, localLeds);
 	shiftOut(10, 11, MSBFIRST, computerLeds);
 	digitalWrite(12, HIGH);
 }
-
