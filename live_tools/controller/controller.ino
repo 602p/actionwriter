@@ -1,4 +1,13 @@
-#include <Keyboard.h>
+#undef USE_NICOHOOD_HID
+
+#ifdef USE_NICOHOOD_HID
+	#include "HID-Project.h"
+	#define _KEYBOARD BootKeyboard
+#else
+	#include <Keyboard.h>
+	#define _KEYBOARD Keyboard
+#endif
+
 #include "defines.c"
 
 const int COL_ADDRESS_PINS[4] = {2, 3, 4, 5};
@@ -97,7 +106,7 @@ void setup(){
 		Serial.println(")");
 	}
 	if(CFG_usbkbd_on){
-		Keyboard.begin();
+		_KEYBOARD.begin();
 	}
 
 	memset(old_state, 0, sizeof state);
@@ -134,10 +143,13 @@ void loop(){
 	bitWrite(leds1, 2, mode==M_ROT13);
 	bitWrite(leds1, 3, mode==M_SERIAL);
 
+	#ifdef USE_NICOHOOD_HID
 	if(CFG_serial_on){
-
+		bitWrite(leds1, 5, _KEYBOARD.getLeds() & LED_CAPS_LOCK);
+		bitWrite(leds1, 6, _KEYBOARD.getLeds() & LED_NUM_LOCK);
 	}
-	
+	#endif
+
 	writeAllLEDS(leds1, leds2);
 
 	memcpy(old_state, state, sizeof state);
@@ -166,7 +178,7 @@ void keydown(int code){
 	unsigned char mapped_code = xf_mapped(code);
 	
 	if(CFG_usbkbd_on && mode!=M_SERIAL){
-		Keyboard.press(mapped_code);
+		_KEYBOARD.press(mapped_code);
 	}
 	if(CFG_serial_on && mode==M_SERIAL){
 		Serial.print("P");
@@ -180,7 +192,7 @@ void keyup(int code){
 	unsigned char mapped_code = xf_mapped(code);
 
 	if(CFG_usbkbd_on && mode!=M_SERIAL){
-		Keyboard.release(mapped_code);
+		_KEYBOARD.release(mapped_code);
 	}
 	if(CFG_serial_on && mode==M_SERIAL){
 		Serial.print("R");
