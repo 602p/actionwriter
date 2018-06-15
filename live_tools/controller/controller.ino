@@ -36,7 +36,7 @@ const unsigned char DEFAULT_MAP[64] = {KEY_LEFT_GUI, ' ', KEY_END, 0 /*HWMeta*/,
 	0 /*unused*/, KEY_DELETE, KEY_LEFT_CTRL, KEY_LEFT_ALT, '\t', KEY_ESC,
 	0 /*unused*/, KEY_LEFT_SHIFT, 'z', 'q', '1', '`', 'a', 'x', 'w', '2',
 	's', 'c', 'e', '3', 'd', 'b', 'v', 't', 'r', '4', '5', 'f', 'g', 'n', 'm',
-	'y', 'u', '7', '6', 'j', 'h', ',', ']', 'i', '8', '+', 'k', '.', 'o', '9',
+	'y', 'u', '7', '6', 'j', 'h', ',', ']', 'i', '8', '=', 'k', '.', 'o', '9',
 	'l', '/', '[', 'p', '0', '-', ';', '\'', KEY_INSERT, KEY_RETURN,
 	KEY_PAGE_DOWN, KEY_PAGE_UP, KEY_BACKSPACE, KEY_HOME};
 
@@ -45,9 +45,15 @@ const unsigned char ROT13_MAP[64]   = {KEY_LEFT_GUI, ' ', KEY_END, 0 /*HWMeta*/,
 	0 /*unused*/, KEY_DELETE, KEY_LEFT_CTRL, KEY_LEFT_ALT, '\t', KEY_ESC,
 	0 /*unused*/, KEY_LEFT_SHIFT, 'm', 'd', '6', '`', 'n', 'k', 'j', '7', 'f',
 	'p', 'r', '8', 'q', 'o', 'i', 'g', 'e', '9', '0', 's', 't', 'a', 'z', 'l',
-	'h', '2', '1', 'w', 'u', ',', ']', 'v', '3', '+', 'x', '.', 'b', '4', 'y',
+	'h', '2', '1', 'w', 'u', ',', ']', 'v', '3', '=', 'x', '.', 'b', '4', 'y',
 	'/', '[', 'c', '5', '-', ';', '\'', KEY_INSERT, KEY_RETURN, KEY_PAGE_DOWN,
 	KEY_PAGE_UP, KEY_BACKSPACE, KEY_HOME};
+
+const unsigned char META_MAP[64] = {0, 0, 0, 0, 0, 0, KEY_CAPS_LOCK, 0, 0, 0,
+	0, 0, 0, 0, KEY_F1, 0, 0, 0, 0, KEY_F2, 0, 0, 0, KEY_F3, 0, 0, 0, 0, 0,
+	KEY_F4, KEY_F5, 0, 0, 0, 0, 0, 0, KEY_F7, KEY_F6, KEY_DOWN_ARROW,
+	KEY_LEFT_ARROW, 0, '\\', 0, KEY_F8, KEY_F12, KEY_UP_ARROW, 0, 0, KEY_F9,
+	KEY_RIGHT_ARROW, '\\', 0, 0, KEY_F10, KEY_F11, 0, 0, 0, 0, 0, 0, 0, 0};
 
 enum {
 	M_DEFAULT,
@@ -159,21 +165,26 @@ void loop(){
 
 void keydown(int code){
 	if(mode==M_DEFAULT && state[LK_META] && code==LK_r){
+		releaseAll(DEFAULT_MAP);
 		mode=M_ROT13;
 		return;
 	}
 
 	if(mode==M_DEFAULT && state[LK_META] && code==LK_s){
+		releaseAll(DEFAULT_MAP);
 		mode=M_SERIAL;
 		return;
 	}
 
 	if(mode!=M_DEFAULT && state[LK_META] && code==LK_mar_rel){
+		releaseAll(DEFAULT_MAP);
 		mode=M_DEFAULT;
 		return;
 	}
 
-	if(code==LK_META) return;
+	if(code==LK_META){
+		return;
+	}
 
 	unsigned char mapped_code = xf_mapped(code);
 	
@@ -187,7 +198,10 @@ void keydown(int code){
 }
 
 void keyup(int code){
-	if(code==LK_META) return;
+	if(code==LK_META){
+		releaseAll(META_MAP);
+		return;
+	}
 
 	unsigned char mapped_code = xf_mapped(code);
 
@@ -204,27 +218,17 @@ unsigned char xf_mapped(int code){
 	const unsigned char* active_map = mode==M_ROT13?ROT13_MAP:DEFAULT_MAP;
 	unsigned char mapped_code = active_map[code];
 
-	if(state[LK_META]){
-		if     (code==LK_bracket) 	mapped_code='\\';
-		else if(code==LK_k) 		mapped_code=KEY_UP_ARROW;
-		else if(code==LK_j) 		mapped_code=KEY_DOWN_ARROW;
-		else if(code==LK_h) 		mapped_code=KEY_LEFT_ARROW;
-		else if(code==LK_l) 		mapped_code=KEY_RIGHT_ARROW;
-		else if(code==LK_one) 		mapped_code=KEY_F1;
-		else if(code==LK_two) 		mapped_code=KEY_F2;
-		else if(code==LK_three) 	mapped_code=KEY_F3;
-		else if(code==LK_four) 		mapped_code=KEY_F4;
-		else if(code==LK_five) 		mapped_code=KEY_F5;
-		else if(code==LK_six) 		mapped_code=KEY_F6;
-		else if(code==LK_seven) 	mapped_code=KEY_F7;
-		else if(code==LK_eight) 	mapped_code=KEY_F8;
-		else if(code==LK_nine) 		mapped_code=KEY_F9;
-		else if(code==LK_zero) 		mapped_code=KEY_F10;
-		else if(code==LK_minus) 	mapped_code=KEY_F11;
-		else if(code==LK_plus) 		mapped_code=KEY_F12;
+	if(state[LK_META] && META_MAP[code]!=0){
+		mapped_code = META_MAP[code];
 	}
 
 	return mapped_code;
+}
+
+void releaseAll(const unsigned char map[64]){
+	for(int i=0; i<64; i++){
+		if(map[i]!=0) _KEYBOARD.release(map[i]);
+	}
 }
 
 void setColumnHigh(int address){

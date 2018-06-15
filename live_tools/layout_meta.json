@@ -1,0 +1,21 @@
+{
+    "one": "KEY_F1",
+    "two": "KEY_F2",
+    "three": "KEY_F3",
+    "four": "KEY_F4",
+    "five": "KEY_F5",
+    "six": "KEY_F6",
+    "seven": "KEY_F7",
+    "eight": "KEY_F8",
+    "nine": "KEY_F9",
+    "zero": "KEY_F10",
+    "minus": "KEY_F11",
+    "plus": "KEY_F12",
+    "k": "KEY_UP_ARROW",
+    "j": "KEY_DOWN_ARROW",
+    "h": "KEY_LEFT_ARROW",
+    "l": "KEY_RIGHT_ARROW",
+    "bracket": "'\\\\'",
+    "slash": "'\\\\'",
+    "lock": "KEY_CAPS_LOCK"
+}

@@ -22,6 +22,6 @@ with open(sys.argv[1], 'r') as fd:
 
 for_arduino=[]
 for item in keymap:
-	for_arduino.append(layout[item])
+	for_arduino.append(layout.get(item, '0'))
 
 print(", ".join(for_arduino))
