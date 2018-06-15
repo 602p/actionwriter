@@ -204,11 +204,25 @@ unsigned char xf_mapped(int code){
 	const unsigned char* active_map = mode==M_ROT13?ROT13_MAP:DEFAULT_MAP;
 	unsigned char mapped_code = active_map[code];
 
-	if(state[LK_META] && code==LK_bracket) mapped_code='\\';
-	if(state[LK_META] && code==LK_k) mapped_code=KEY_UP_ARROW;
-	if(state[LK_META] && code==LK_j) mapped_code=KEY_DOWN_ARROW;
-	if(state[LK_META] && code==LK_h) mapped_code=KEY_LEFT_ARROW;
-	if(state[LK_META] && code==LK_l) mapped_code=KEY_RIGHT_ARROW;
+	if(state[LK_META]){
+		if     (code==LK_bracket) 	mapped_code='\\';
+		else if(code==LK_k) 		mapped_code=KEY_UP_ARROW;
+		else if(code==LK_j) 		mapped_code=KEY_DOWN_ARROW;
+		else if(code==LK_h) 		mapped_code=KEY_LEFT_ARROW;
+		else if(code==LK_l) 		mapped_code=KEY_RIGHT_ARROW;
+		else if(code==LK_one) 		mapped_code=KEY_F1;
+		else if(code==LK_two) 		mapped_code=KEY_F2;
+		else if(code==LK_three) 	mapped_code=KEY_F3;
+		else if(code==LK_four) 		mapped_code=KEY_F4;
+		else if(code==LK_five) 		mapped_code=KEY_F5;
+		else if(code==LK_six) 		mapped_code=KEY_F6;
+		else if(code==LK_seven) 	mapped_code=KEY_F7;
+		else if(code==LK_eight) 	mapped_code=KEY_F8;
+		else if(code==LK_nine) 		mapped_code=KEY_F9;
+		else if(code==LK_zero) 		mapped_code=KEY_F10;
+		else if(code==LK_minus) 	mapped_code=KEY_F11;
+		else if(code==LK_plus) 		mapped_code=KEY_F12;
+	}
 
 	return mapped_code;
 }
